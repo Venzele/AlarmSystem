@@ -1,29 +1,36 @@
 using UnityEngine;
-using UnityEngine.Events;
 
 public class Alarm : MonoBehaviour
 {
+    [SerializeField] private float _speed;
+
     private WayThief _thief;
-    private MaxVolumeAlarm _maxVolumeAlarm;
     private AudioSource _sound;
+    private float _runningTime;
 
     private void Start()
     {
         _thief = FindObjectOfType<WayThief>();
-        _maxVolumeAlarm = FindObjectOfType<MaxVolumeAlarm>();
-        _sound = FindObjectOfType<AudioSource>();
+        _sound = GetComponent<AudioSource>();
     }
 
     private void Update()
     {
         if (transform.position.x >= _thief.transform.position.x)
-        {
-            _sound.mute = false;
-            _sound.volume = Mathf.MoveTowards(transform.position.x, _maxVolumeAlarm.transform.position.x, ((_thief.transform.position.x - transform.position.x) / (transform.position.x - _maxVolumeAlarm.transform.position.x)) + transform.position.x);
-        }
+            _runningTime += Time.deltaTime * _speed;
         else
-        {
-            _sound.mute = true;
-        }    
+            _runningTime -= Time.deltaTime * _speed;
+
+        SetMaxValue();
+
+        _sound.volume = Mathf.MoveTowards(0, 1, _runningTime);
+    }
+
+    private void SetMaxValue()
+    {
+        if (_runningTime >= 1)
+            _runningTime = 1;
+        else if (_runningTime <= 0)
+            _runningTime = 0;
     }
 }
